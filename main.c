@@ -207,6 +207,33 @@ void move_player(char move) //* Function to move the player
 
 
 
+void decide_move(char c) //* Function to check the object in front and decide whether to move or not
+{
+    switch (c)
+    {
+        case 'h':// left
+            if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-1] != '#')
+                move_player(c);
+            break;
+        case 'j':// under
+            if (nowPlayMap[current_player_pos[1]+1][current_player_pos[0]] != '#')
+                move_player(c);
+            break;
+        case 'k':// top
+            if (nowPlayMap[current_player_pos[1]-1][current_player_pos[0]] != '#')
+                move_player(c);
+            break;
+        case 'l' :// right
+            if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+1] != '#')
+                move_player(c);
+            break;
+    }
+}
+
+
+
+
+
 void printmap(int imap) //* Prints the map currently being played
 {
     for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
@@ -245,11 +272,11 @@ int main(void)
     selectmap(imap);
     printmap(imap);
 
-    while(i != 10)
+    while(1)
     {
         // Assume map file number 1
         command = getch();
-        move_player(command);
+        decide_move(command);
         printmap(imap);
         // TESTING
         i++;
