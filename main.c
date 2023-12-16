@@ -180,11 +180,16 @@ void get_player_pos(int imap) //* Function to find the player's location
 }
 
 
-void move_player(char move) //* Function to move the player
+void move_player(char move,int imap) //* Function to move the player
 {
-    //First, up, down, left and right
-    //First delete the location of the golbaengi in the map file
-    nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '.';
+    if(map[imap][current_player_pos[1]][current_player_pos[0]]=='O') // If the player's position was originally O (uppercase o)
+    {
+        nowPlayMap[current_player_pos[1]][current_player_pos[0]] = 'O'; // Change to O
+    }
+    else
+    {
+        nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '.'; // Otherwise change to .d
+    }
 
     switch (move)
     {
@@ -206,7 +211,7 @@ void move_player(char move) //* Function to move the player
 }
 
 
-void move_box(char c) // Check if a box exists in front of the player's movement direction. If there is a wall or another box in front of the box, it will not move.
+void move_box(char c,int imap) // Check if a box exists in front of the player's movement direction. If there is a wall or another box in front of the box, it will not move.
 {
     //check dollar front
     switch (c)
@@ -215,33 +220,33 @@ void move_box(char c) // Check if a box exists in front of the player's movement
             if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '$' )
             {
                 nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] = '$';
-                move_player(c);
+                move_player(c,imap);
             }
             break;
         case 'j':// under
             if (nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '$' )
             {
                 nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] = '$';
-                move_player(c);
+                move_player(c,imap);
             }
             break;
         case 'k':// top
             if (nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '$' )
             {
                 nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] = '$';
-                move_player(c);
+                move_player(c,imap);
             }
             break;
         case 'l' :// right
             if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '$' )
             {
                 nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] = '$';
-                move_player(c);
+                move_player(c,imap);
             }
             break;
     }
 }
-void decide_move(char c) //* Function to check the object in front and decide whether to move or not
+void decide_move(char c,int imap) //* Function to check the object in front and decide whether to move or not
 {
     switch (c)
     {
@@ -249,11 +254,11 @@ void decide_move(char c) //* Function to check the object in front and decide wh
             if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-1] != '#')
             {
                 if(nowPlayMap[current_player_pos[1]][current_player_pos[0]-1] == '$') {
-                    move_box(c);
+                    move_box(c,imap);
                 }
                 else
                 {
-                    move_player(c);
+                    move_player(c,imap);
                 }
             }
             break;
@@ -262,11 +267,11 @@ void decide_move(char c) //* Function to check the object in front and decide wh
             {
                 if (nowPlayMap[current_player_pos[1]+1][current_player_pos[0]] == '$')
                 {
-                    move_box(c);
+                    move_box(c,imap);
                 }
                 else
                 {
-                    move_player(c);
+                    move_player(c,imap);
                 }
             }
             break;
@@ -275,11 +280,11 @@ void decide_move(char c) //* Function to check the object in front and decide wh
             {
                 if (nowPlayMap[current_player_pos[1]-1][current_player_pos[0]] == '$')
                 {
-                    move_box(c);
+                    move_box(c,imap);
                 }
                 else
                 {
-                    move_player(c);
+                    move_player(c,imap);
                 }
             }
             break;
@@ -288,11 +293,11 @@ void decide_move(char c) //* Function to check the object in front and decide wh
             {
                 if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+1] == '$')
                 {
-                    move_box(c);
+                    move_box(c,imap);
                 }
                 else
                 {
-                    move_player(c);
+                    move_player(c,imap);
                 }
             }
             break;
@@ -345,10 +350,10 @@ int main(void)
     {
         // Assume map file number 1
         command = getch();
-        decide_move(command);
+        decide_move(command,imap);
         printmap(imap);
         // TESTING
-        i++;
+        // i++;
     }
 
     return 0;
