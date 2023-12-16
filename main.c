@@ -4,6 +4,7 @@
 
 char temp[5][30][30]; //* Variable for first reading the map file and storing the data
 char map[5][30][30]; //* Variable that processes and stores the temp variable
+int current_player_pos[2];
 
 
 void load_map(void){ //* Function to load data from a map file, store it in temp, process it, and save it in map
@@ -53,7 +54,7 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
 
             case '5':
                 imap = 4;
-                ix = 0;
+                iy = 0;
                 ix = 0;
                 will_load = false;
                 break;
@@ -131,12 +132,34 @@ int checkYsize(int imap, int Xsize) //* Function to find the Y size of the array
 }
 
 
+void get_player_pos(int imap)
+{
+    for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
+    {
+        for (int ix = 0; ix < checkXsize(imap); ix++)
+        {
+            switch(map[imap][iy][ix])
+            {
+                case '@':
+                    current_player_pos[0] = ix;
+                    current_player_pos[1] = iy;
+            }
+        }
+        printf("\n");
+    }
+}
+
+
+
+
 int main(void)
 {
     load_map();
 
       for (int imap = 0; imap <= 4; imap++)
     {
+        get_player_pos(imap);
+        printf("PLAYER_POSITION: %d, %d\n", current_player_pos[0], current_player_pos[1]);
         for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
         {
             for (int ix = 0; ix < checkXsize(imap); ix++)
