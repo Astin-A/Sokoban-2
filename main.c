@@ -1,13 +1,38 @@
+#include <termios.h>
 #include <stdio.h>
-#include <conio.h>
 #define true 1
 #define false 0
 
 
 
 char map[5][30][30]; //* Variable that processes and stores the temp variable in load_map
-char nowPlayMap[30][30] = {NULL, };
-int current_player_pos[2];
+char nowPlayMap[30][30] = {NULL, }; //* Variable to store the map currently being played
+int current_player_pos[2]; //* Variable to store the player's location
+
+
+int getch(void) //* Function for using getch() in Linux
+{
+    int ch;
+
+    struct termios buf;
+    struct termios save;
+
+    tcgetattr(0, &save);
+    buf = save;
+
+    buf.c_lflag &= ~(ICANON|ECHO);
+    buf.c_cc[VMIN] = 1;
+    buf.c_cc[VTIME] = 0;
+
+    tcsetattr(0, TCSAFLUSH, &buf);
+
+    ch = getchar();
+
+    tcsetattr(0, TCSAFLUSH, &save);
+
+    return ch;
+}
+
 
 
 void load_map(void){ //* Function to load data from a map file, store it in temp, process it, and save it in map
@@ -137,7 +162,7 @@ int checkYsize(int imap, int Xsize) //* Function to find the Y size of the array
 }
 
 
-void get_player_pos(int imap)
+void get_player_pos(int imap) //* Function to find the player's location
 {
     for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
     {
@@ -155,59 +180,80 @@ void get_player_pos(int imap)
 }
 
 
-void move_player(char c)
+void move_player(char move) //* Function to move the player
 {
     //First, up, down, left and right
     //First delete the location of the golbaengi in the map file
-    nowPlayMap[current_player_pos[0]][current_player_pos[1]] = '.';
-    switch (c)
+    nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '.';
+
+    switch (move)
     {
         case 'h':// left
             current_player_pos[0]-=1;
+            break;
         case 'j':// under
-            current_player_pos[1]+=1
+            current_player_pos[1]+=1;
+            break;
         case 'k':// top
             current_player_pos[1]-=1;
+            break;
         case 'l' :// right 
             current_player_pos[0]+=1;
+            break;
     }
     // Take a new picture of the golbaengi location
-    nowPlayMap[current_player_pos[0]][current_player_pos[1]] = '@';
+    nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '@';
 }
 
 
+
+void printmap(int imap) //* Prints the map currently being played
+{
+    for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
+    {
+        for (int ix = 0; ix < checkXsize(imap); ix++)
+        {
+            printf("%c", nowPlayMap[iy][ix]);
+        }
+        printf("\n");
+    }
+    printf("\n\n");
+}
+
+void selectmap(int imap) // Select the map to play
+{
+    for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
+    {
+        for (int ix = 0; ix < checkXsize(imap); ix++)
+        {
+            nowPlayMap[iy][ix] = map[imap][iy][ix];
+        }
+    }
+
+    get_player_pos(imap);
+}
 
 int main(void)
 {
     char command;
+    int imap = 0;
+
     load_map();
 
-    /*
-    for (int imap = 0; imap <= 4; imap++)
-    {
-        get_player_pos(imap);
-        printf("PLAYER_POSITION: %d, %d\n", current_player_pos[0], current_player_pos[1]);
-        for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
-        {
-            for (int ix = 0; ix < checkXsize(imap); ix++)
-            {
-                printf("%c", map[imap][iy][ix]);
-            }
-        }
-            printf("\n");
-    }
-        printf("\n\n");
-}
-*/
-    while(1)
-    {
+    int i = 0;
 
-        //* Assuming map file number 1
+    selectmap(imap);
+    printmap(imap);
+
+    while(i != 10)
+    {
+        // Assume map file number 1
         command = getch();
         move_player(command);
-        //
+        printmap(imap);
+        // TESTING
+        i++;
     }
-
 
     return 0;
 }
