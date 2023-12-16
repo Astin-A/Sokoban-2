@@ -206,26 +206,95 @@ void move_player(char move) //* Function to move the player
 }
 
 
-
+void move_box(char c) // Check if a box exists in front of the player's movement direction. If there is a wall or another box in front of the box, it will not move.
+{
+    //check dollar front
+    switch (c)
+    {
+        case 'h':// left
+            if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '$' )
+            {
+                nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] = '$';
+                move_player(c);
+            }
+            break;
+        case 'j':// under
+            if (nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '$' )
+            {
+                nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] = '$';
+                move_player(c);
+            }
+            break;
+        case 'k':// top
+            if (nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '$' )
+            {
+                nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] = '$';
+                move_player(c);
+            }
+            break;
+        case 'l' :// right
+            if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '$' )
+            {
+                nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] = '$';
+                move_player(c);
+            }
+            break;
+    }
+}
 void decide_move(char c) //* Function to check the object in front and decide whether to move or not
 {
     switch (c)
     {
         case 'h':// left
             if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-1] != '#')
-                move_player(c);
+            {
+                if(nowPlayMap[current_player_pos[1]][current_player_pos[0]-1] == '$') {
+                    move_box(c);
+                }
+                else
+                {
+                    move_player(c);
+                }
+            }
             break;
         case 'j':// under
             if (nowPlayMap[current_player_pos[1]+1][current_player_pos[0]] != '#')
-                move_player(c);
+            {
+                if (nowPlayMap[current_player_pos[1]+1][current_player_pos[0]] == '$')
+                {
+                    move_box(c);
+                }
+                else
+                {
+                    move_player(c);
+                }
+            }
             break;
         case 'k':// top
             if (nowPlayMap[current_player_pos[1]-1][current_player_pos[0]] != '#')
-                move_player(c);
+            {
+                if (nowPlayMap[current_player_pos[1]-1][current_player_pos[0]] == '$')
+                {
+                    move_box(c);
+                }
+                else
+                {
+                    move_player(c);
+                }
+            }
             break;
         case 'l' :// right
             if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+1] != '#')
-                move_player(c);
+            {
+                if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+1] == '$')
+                {
+                    move_box(c);
+                }
+                else
+                {
+                    move_player(c);
+                }
+            }
             break;
     }
 }
