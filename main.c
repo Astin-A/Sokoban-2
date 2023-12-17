@@ -334,6 +334,18 @@ void selectmap(int imap) // Select the map to play
     get_player_pos(imap);
 }
 
+void newgame(void) // Restart from the first map
+{
+    int imap=0;
+
+    selectmap(imap);
+    printmap(imap);
+}
+
+
+
+
+
 int main(void)
 {
     char command;
@@ -350,6 +362,12 @@ int main(void)
     {
         // Assume map file number 1
         command = getch();
+        switch(command)
+        {
+            case 'n':
+                newgame();
+                break;
+        }        
         decide_move(command,imap);
         printmap(imap);
         // TESTING
