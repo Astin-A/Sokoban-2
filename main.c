@@ -8,6 +8,7 @@
 char map[5][30][30]; //* Variable that processes and stores the temp variable in load_map
 char nowPlayMap[30][30] = {NULL, }; //* Variable to store the map currently being played
 int current_player_pos[2]; //* Variable to store the player's location
+int current_goals; //* Number of target points
 
 
 int getch(void) //* Function for using getch() in Linux
@@ -179,9 +180,27 @@ void get_player_pos(int imap) //* Function to find the player's location
     }
 }
 
+void check_goals(int imap)
+{
+    int goals_achieved = 0;
+    for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
+    {
+        for (int ix = 0; ix < checkXsize(imap); ix++)
+        {
+            if (nowPlayMap[iy][ix] == '$' && map[imap][iy][ix] == 'O')
+                goals_achieved ++;
+        }
+    }
+
+    printf("GOALS ACHIEVED: %d\nCURR GOALS: %d\n", goals_achieved, current_goals);
+
+    if (goals_achieved == current_goals)
+        printf("==YOU WIN==\n");
+}
 
 void move_player(char move,int imap) //* Function to move the player
 {
+    check_goals(imap); //! Check whether there is a goal every time the box moves
     if(map[imap][current_player_pos[1]][current_player_pos[0]]=='O') // If the player's position was originally O (uppercase o)
     {
         nowPlayMap[current_player_pos[1]][current_player_pos[0]] = 'O'; // Change to O
@@ -328,6 +347,10 @@ void selectmap(int imap) // Select the map to play
         for (int ix = 0; ix < checkXsize(imap); ix++)
         {
             nowPlayMap[iy][ix] = map[imap][iy][ix];
+
+            //Counting target point
+            if (nowPlayMap[iy][ix] == 'O')
+                current_goals++;
         }
     }
 
