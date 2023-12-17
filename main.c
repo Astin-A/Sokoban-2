@@ -10,6 +10,15 @@ char nowPlayMap[30][30] = {NULL, }; //* Variable to store the map currently bein
 int current_player_pos[2]; //* Variable to store the player's location
 int current_goals = 0; //* Number of target points
 int current_map_no;
+_Bool check_error = 0;
+
+_Bool check_mapfile(int n,int m) //* Check the number of boxes and goal points in the map file, and output an error if the numbers are different.
+{
+    if(n==m)
+        return 1;
+    else
+        return 0;
+}
 
 void selectmap(int imap);
 
@@ -47,13 +56,17 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
      * iy: Map row (Y-axis) number
      * ix: Column (X-axis) number of the map
      * will_load: Variable that sets whether to load characters
+     * check_box: Variable that checks the number of boxes in the map file
+     * check_goals: Variable that checks the location of goals in the map file
+     * check_error: Variable that determines errors by checking the location of boxes and goals on the map
     */
     char temp[5][30][30] = {NULL, };
     int imap = 0, iy = 0, ix = 0, c = 0;
+    int check_box=0,check_goals=0;
     _Bool will_load = false;
     ifp = fopen("map", "r");
 
-    while ((c = getc(ifp)) != EOF) //* Load map file
+    while ((c = getc(ifp)) != EOF) 
     {
         switch (c)
         {
@@ -68,6 +81,10 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
                 imap = 1;
                 iy = 0;
                 ix = 0;
+                if(!(check_mapfile(check_box,check_goals)))
+                    check_error=1;
+                check_box=0;
+                check_goals=0;
                 will_load = false;
                 break;
 
@@ -75,6 +92,10 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
                 imap = 2;
                 iy = 0;
                 ix = 0;
+                if(!(check_mapfile(check_box,check_goals)))
+                    check_error=1;
+                check_box=0;
+                check_goals=0;
                 will_load = false;
                 break;
 
@@ -82,6 +103,10 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
                 imap = 3;
                 iy = 0;
                 ix = 0;
+                if(!(check_mapfile(check_box,check_goals)))
+                    check_error=1;
+                check_box=0;
+                check_goals=0;
                 will_load = false;
                 break;
 
@@ -89,6 +114,10 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
                 imap = 4;
                 iy = 0;
                 ix = 0;
+                if(!(check_mapfile(check_box,check_goals)))
+                    check_error=1;
+                check_box=0;
+                check_goals=0;
                 will_load = false;
                 break;
 
@@ -102,11 +131,19 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
                 break;
 
             case 'e':
-                goto load_map_end;
+                if(!(check_mapfile(check_box,check_goals)))
+                        check_error=1;
+                    check_box=0;
+                    check_goals=0;
+                    goto load_map_end;
 
             default:
                 temp[imap][iy][ix] = c;
                 ix++;
+                if(c=='$')
+                    check_box++;
+                else if(c=='O')
+                    check_goals++;
                 break;
         }
     }
@@ -114,6 +151,11 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
     load_map_end:
 
     fclose(ifp);
+    if(check_error==1) {
+        printf("Error");
+        return;
+    }
+
 
     for (int i1 = 0; i1 <= 4; i1++)
     {
