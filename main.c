@@ -50,7 +50,7 @@ void load_map(void){ //* Function to load data from a map file, store it in temp
     _Bool will_load = false;
     ifp = fopen("map", "r");
 
-    while ((c = getc(ifp)) != EOF)
+    while ((c = getc(ifp)) != EOF) //* Load map file
     {
         switch (c)
         {
@@ -188,7 +188,7 @@ void move_player(char move,int imap) //* Function to move the player
     }
     else
     {
-        nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '.'; // Otherwise change to .d
+        nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '.'; // Otherwise change to .
     }
 
     switch (move)
@@ -207,11 +207,11 @@ void move_player(char move,int imap) //* Function to move the player
             break;
     }
     // Take a new picture of the golbaengi location
-    nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '@';
+    nowPlayMap[current_player_pos[1]][current_player_pos[0]] = '@'; // Express player movement
 }
 
 
-void move_box(char c,int imap) // Check if a box exists in front of the player's movement direction. If there is a wall or another box in front of the box, it will not move.
+void move_box(char c,int imap) //* 1. Check whether a box exists in front of the player's direction of movement. 2. If there is a wall or another box in front of the box, it will not move.
 {
     //check dollar front
     switch (c)
@@ -360,7 +360,7 @@ int main(void)
 
     while(1)
     {
-        // Assume map file number 1
+        //? Assume map file number 1, Map selection function scheduled to be added in the future
         command = getch();
         switch(command)
         {
