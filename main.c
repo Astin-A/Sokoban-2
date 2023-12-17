@@ -9,7 +9,9 @@ char map[5][30][30]; //* Variable that processes and stores the temp variable in
 char nowPlayMap[30][30] = {NULL, }; //* Variable to store the map currently being played
 int current_player_pos[2]; //* Variable to store the player's location
 int current_goals; //* Number of target points
+int current_map_no;
 
+void selectmap(int imap);
 
 int getch(void) //* Function for using getch() in Linux
 {
@@ -195,7 +197,7 @@ void check_goals(int imap)
     printf("GOALS ACHIEVED: %d\nCURR GOALS: %d\n", goals_achieved, current_goals);
 
     if (goals_achieved == current_goals)
-        printf("==YOU WIN==\n");
+        selectmap(++current_map_no);
 }
 
 void move_player(char move,int imap) //* Function to move the player
@@ -354,7 +356,7 @@ void selectmap(int imap) // Select the map to play
         }
     }
 
-    get_player_pos(imap);
+    get_player_pos(current_map_no);
 }
 
 void newgame(void) // Restart from the first map
@@ -376,10 +378,10 @@ int main(void)
 
     load_map();
 
-    int i = 0;
+    current_map_no = 0;
 
-    selectmap(imap);
-    printmap(imap);
+    selectmap(current_map_no);
+    printmap(current_map_no);
 
     while(1)
     {
@@ -391,8 +393,8 @@ int main(void)
                 newgame();
                 break;
         }        
-        decide_move(command,imap);
-        printmap(imap);
+        decide_move(command, imap);
+        printmap(current_map_no);
         // TESTING
         // i++;
     }
