@@ -12,6 +12,8 @@ int current_player_pos[2]; //* Variable to store the player's location
 int current_goals = 0; //* Number of target points
 int current_map_no;
 _Bool check_error = 0;
+char name[10] = {'\0'}; //* Variable that receives the user name
+int move_count=0; //* Variables to be used in the leaderboard
 
 _Bool check_mapfile(int n,int m) //* Check the number of boxes and goal points in the map file, and output an error if the numbers are different.
 {
@@ -461,15 +463,24 @@ void ranking(int move_count, char imap)
 
 }
 
-void save(char name[], int move_count){
+void save(void){
     FILE *ofp;
 
     ofp = fopen("sokoban","w");
-    fprintf(ofp, "%s\n%d", name, move_count);
+    fprintf(ofp, "%s %d", name, move_count);
 
     fclose(ofp);
 }
 
+void load(void){
+    FILE *ifp;
+
+    ifp = fopen("sokoban","r");
+    fscanf(ifp, "%s %d", name, &move_count);
+    printf("%s %d", name, move_count);
+
+    fclose(ifp);
+}
 
 int main(void)
 {
@@ -505,10 +516,14 @@ int main(void)
 
         switch(command)
         {
-            case 's':
-                save(name, move_count);
+            case 'f':
+                load();
                 break;
-                
+            
+            case 's':
+                save();
+                break;
+
             case 'n':
                 newgame(0);
                 move_count=0;
