@@ -441,7 +441,25 @@ void record_history(char move) //* Function to record player movements
     }
 }
 
+void ranking(int move_count, char imap)
+{
 
+    int i,j,change,k;
+
+    if (imap == '\n')
+        printf("%d\n", move_count);
+    else if (imap == '1')
+        printf("%d\n", move_count);
+    else if (imap == '2')
+        printf("%d\n", move_count);
+    else if (imap == '3')
+        printf("%d\n", move_count);
+    else if (imap == '4')
+        printf("%d\n", move_count);
+    else if (imap == '5')
+        printf("%d\n", move_count);
+
+}
 
 
 int main(void)
@@ -449,6 +467,7 @@ int main(void)
     char command;
     int imap = 0;
     char name[10] = {'\0'};
+    int move_count=0; // Variables to be used in the leaderboard
 
     load_map();
 
@@ -462,7 +481,8 @@ int main(void)
     current_map_no = 0;
 
     selectmap(current_map_no);
-    //printmap(current_map_no);
+    printmap(current_map_no);
+    printf("history: ");
 
     while(1)
     {
@@ -482,31 +502,48 @@ int main(void)
             case 'u':
                 is_undoing = true;
                 decide_move(history[4], current_map_no);
+                is_undoing = false;
+                break;
+            case 'o':
+                goto end;
+                break;
+            case 't':
+                command = getch();
+                ranking(move_count,command);
+                break;
+            case 'h':
+            case 'j':
+            case 'k':
+            case 'l':
+                move_count++;
+                decide_move(command, imap);
+                printmap(current_map_no);
+
+                printf("history: ");
+                for (int i = 0; i <= 4; ++i) {
+                    printf("%c", history[i]);
+                }
+                break;
         }
 
-        is_undoing = false;
 
-        decide_move(command, imap);
-        printmap(current_map_no);
-        printf("history: ");
-        for (int i = 0; i <= 4; ++i) {
-            printf("%c", history[i]);
-        }
         printf("\n");
         // TESTING
         // i++;
     }
 
+    end:
     return 0;
 }
 
 
 
 /*
-#define player 15
-int player_name=0; // Save to player array
+
 Main function
-char player_ranking[player]; // Save player name
+
+
+
 int move_count=0; // Variables to be used in the leaderboard
 printf("User name: ");
 scanf("%s", &player_ranking[player_name]);
