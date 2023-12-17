@@ -11,7 +11,7 @@ char nowPlayMap[30][30] = {NULL, }; //* Variable to store the map currently bein
 int current_player_pos[2]; //* Variable to store the player's location
 int current_goals = 0; //* Number of target points
 int current_map_no;
-_Bool check_error = 0;
+_Bool check_error = 0, is_undoing;
 char name[10] = {'\0'}; //* Variable that receives the user name
 int move_count=0; //* Variables to be used in the leaderboard
 
@@ -211,13 +211,13 @@ int checkYsize(int imap, int Xsize) //* Function to find the Y size of the array
 }
 
 
-void get_player_pos(int imap) //* Function to find the player's location
+void get_player_pos(void) //* Function to find the player's location
 {
-    for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
+    for (int iy = 0; iy < checkYsize(current_map_no, checkXsize(current_map_no)); iy++)
     {
-        for (int ix = 0; ix < checkXsize(imap); ix++)
+        for (int ix = 0; ix < checkXsize(current_map_no); ix++)
         {
-            switch(map[imap][iy][ix])
+            switch(nowPlayMap[iy][ix])
             {
                 case '@':
                     current_player_pos[0] = ix;
@@ -262,19 +262,19 @@ void move_player(char move,int imap) //* Function to move the player
     {
         case 'h':// left
             current_player_pos[0]-=1;
-            record_history('l');
+            if (!is_undoing) record_history('l');
             break;
         case 'j':// under
             current_player_pos[1]+=1;
-            record_history('k');
+            if (!is_undoing) record_history('k');
             break;
         case 'k':// top
             current_player_pos[1]-=1;
-            record_history('j');
+            if (!is_undoing) record_history('j');
             break;
         case 'l' :// right 
             current_player_pos[0]+=1;
-            record_history('h');
+            if (!is_undoing) record_history('h');
             break;
     }
     // Take a new picture of the golbaengi location
@@ -283,6 +283,7 @@ void move_player(char move,int imap) //* Function to move the player
     check_goals(imap); //! Check whether there is a goal every time the box moves
 }
 
+_Bool is_box_moved = 0;
 
 void move_box(char c,int imap) //* 1. Check whether a box exists in front of the player's direction of movement. 2. If there is a wall or another box in front of the box, it will not move.
 {
@@ -293,31 +294,48 @@ void move_box(char c,int imap) //* 1. Check whether a box exists in front of the
             if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '$' )
             {
                 nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] = '$';
+                if (!is_undoing) is_box_moved = 1;
                 move_player(c,imap);
+            }else
+            {
+                if (!is_undoing) is_box_moved = 0;
             }
             break;
         case 'j':// under
-            if (nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '$' )
+            if ((nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '$' ))
             {
                 nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] = '$';
+                if (!is_undoing) is_box_moved = 1;;
                 move_player(c,imap);
+            }else
+            {
+                if (!is_undoing) is_box_moved = 0;
             }
             break;
         case 'k':// top
-            if (nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '$' )
+            if ((nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '$' ))
             {
                 nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] = '$';
+                if (!is_undoing) is_box_moved = 1;
                 move_player(c,imap);
+            }else
+            {
+                if (!is_undoing) is_box_moved = 0;
             }
             break;
         case 'l' :// right
-            if (nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '$' )
+            if ((nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '$' ))
             {
                 nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] = '$';
+                if (!is_undoing) is_box_moved = 1;
                 move_player(c,imap);
+            }else
+            {
+                if (!is_undoing) is_box_moved = 0;
             }
             break;
     }
+    if (!is_undoing) is_box_moved = 0;
 }
 void decide_move(char c,int imap) //* Function to check the object in front and decide whether to move or not
 {
@@ -409,7 +427,7 @@ void selectmap(int imap) // Select the map to play
         }
     }
 
-    get_player_pos(current_map_no);
+    get_player_pos();
 }
 
 void newgame(int imap) // Restart from the first map
@@ -421,26 +439,77 @@ void newgame(int imap) // Restart from the first map
 }
 
 int history_idx = 0; //* Variable that reads the history array backwards
-char history[5] = {'\0'}; //* Stack variable that records the movement commands in reverse and stores 5
-_Bool is_undoing = false; //* Variable to distinguish whether the player's movement is undo or a normal command
+char cmd_history[5] = {'\0'}; //Stack variable that records the movement commands in reverse and stores 5
+_Bool box_history[5];
 
 void record_history(char move) //* Function to record player movements
 {
-    if (is_undoing)
-    {
-        for (int i = 3; i >= 0; --i)
-            history[i+1] = history[i];
+     //If a general command is input
+     for (int i = 0; i <= 3; ++i)
+     {
+         cmd_history[i] = cmd_history[i+1];
+         box_history[i] = box_history[i+1];
+     }
 
-        history[0] = '\0';
-    }
-    else
-    {
-        //When a general command is input
-        for (int i = 0; i <= 3; ++i)
-            history[i] = history[i+1];
-        
-        history[4] = move;
-    }
+     cmd_history[4] = move;
+     box_history[4] = is_box_moved;
+}
+
+void undo()
+{
+     is_undoing = true;
+
+     printf("mvbox: %d\n", box_history[4]);
+
+     decide_move(cmd_history[4], current_map_no);
+
+
+
+     if (box_history[4])
+     {
+         printf("mvbox: %c\n", cmd_history[4]);
+         switch (cmd_history[4])
+         {
+             case 'h':// left
+                 if (nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] != '$' )
+                 {
+                     nowPlayMap[current_player_pos[1]][current_player_pos[0]+1] = '$';
+                     nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] = '.';
+                 }
+                 break;
+             case 'j':// ha
+                 if ((nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '$' ))
+                 {
+                     nowPlayMap[current_player_pos[1]-1][current_player_pos[0]] = '$';
+                     nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] = '.';
+                 }
+                 break;
+             case 'k':// award
+                 if ((nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] != '#' && nowPlayMap[current_player_pos[1]-2][current_player_pos[0]] != '$' ))
+                 {
+                     nowPlayMap[current_player_pos[1]+1][current_player_pos[0]] = '$';
+                     nowPlayMap[current_player_pos[1]+2][current_player_pos[0]] = '.';
+                 }
+                 break;
+             case 'l' :// right
+                 if ((nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '#' && nowPlayMap[current_player_pos[1]][current_player_pos[0]+2] != '$' ))
+                 {
+                     nowPlayMap[current_player_pos[1]][current_player_pos[0]-1] = '$';
+                     nowPlayMap[current_player_pos[1]][current_player_pos[0]-2] = '.';
+                 }
+                 break;
+         }
+     }
+     printmap(current_map_no);
+
+     for (int i = 3; i >= 0; --i)
+     {
+         cmd_history[i+1] = cmd_history[i];
+         box_history[i+1] = box_history[i];
+     }
+
+     cmd_history[0] = '\0';
+     box_history[0] = '\0';
 }
 
 void ranking(int move_count, char imap)
@@ -534,9 +603,8 @@ int main(void)
                 break;
 
             case 'u':
-                is_undoing = true;
-                decide_move(history[4], current_map_no);
-                is_undoing = false;
+                get_player_pos();
+                undo();
                 break;
 
             case 'o':
@@ -552,14 +620,11 @@ int main(void)
             case 'j':
             case 'k':
             case 'l':
+                get_player_pos();
+                is_undoing = false;
                 move_count++;
                 decide_move(command, imap);
                 printmap(current_map_no);
-
-                printf("history: ");
-                for (int i = 0; i <= 4; ++i) {
-                    printf("%c", history[i]);
-                }
                 break;
         }
 
@@ -567,6 +632,16 @@ int main(void)
         printf("\n");
         // TESTING
         // i++;
+        printf("commands: ");
+        for (int  i = 0;  i <= 4; ++ i) {
+            printf("%c", cmd_history[i]);
+        }
+        printf("\n");
+        printf("box: ");
+        for (int  i = 0;  i <= 4; ++ i) {
+            printf("%d", box_history[i]);
+        }
+        printf("\nPOSITION: (%d,%d)", current_player_pos[0], current_player_pos[1]);
     }
 
     end:
