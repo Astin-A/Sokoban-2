@@ -417,40 +417,25 @@ void newgame(void) // Restart from the first map
 }
 
 int history_idx = 0; //* Variable that reads the history array backwards
-char history[5] = {'\0'}; //* Variable that records the movement command in reverse and stores 5 of them. Store to queue, read to stack.
+char history[5] = {'\0'}; //* Stack variable that records the movement commands in reverse and stores 5
 _Bool is_undoing = false; //* Variable to distinguish whether the player's movement is undo or a normal command
 
 void record_history(char move) //* Function to record player movements
 {
-    static int past_overwrite_cnt; //* A variable that determines whether history_idx will decrease during the record process.
-
-    if (!is_undoing && history_idx <= 4)
+    if (is_undoing)
     {
-        if (history_idx == 0)
-            past_overwrite_cnt = 0;
+        for (int i = 3; i >= 0; --i)
+            history[i+1] = history[i];
 
-        if (history_idx >= 0)
-            past_overwrite_cnt ++;
-
-        if (past_overwrite_cnt >= 4-history_idx || history_idx > 0)
-            history_idx --;
-
-        //! When a general command is input
-        for (int i = 0; i <= 4-history_idx; ++i)
-            history[i] = history[i+1];
-
-        history[4-history_idx] = move;
+        history[0] = '\0';
     }
-}
-
-void undo(void)
-{
-    if (history_idx < 4 && history[4-history_idx] != '\0')
+    else
     {
-        is_undoing = true;
-        decide_move(history[4-history_idx], current_map_no);
-
-        history_idx ++;
+        //When a general command is input
+        for (int i = 0; i <= 3; ++i)
+            history[i] = history[i+1];
+        
+        history[4] = move;
     }
 }
 
@@ -481,7 +466,7 @@ int main(void)
     {
         //? Assume map file number 1, Map selection function scheduled to be added in the future
         command = getch();
-        printf("idx: %d\n", history_idx);
+        printf("history: ");
         for (int i = 0; i <= 4; ++i) {
             printf("%c", history[i]);
         }
@@ -493,7 +478,8 @@ int main(void)
                 newgame();
                 break;
             case 'u':
-                undo();
+                is_undoing = true;
+                decide_move(history[4], current_map_no);
         }
 
         is_undoing = false;
