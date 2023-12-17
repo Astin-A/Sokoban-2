@@ -1,5 +1,6 @@
 #include <termios.h>
 #include <stdio.h>
+#include <stdlib.h>
 #define true 1
 #define false 0
 
@@ -380,6 +381,7 @@ void decide_move(char c,int imap) //* Function to check the object in front and 
 
 void printmap(int imap) //* Prints the map currently being played
 {
+    system("clear");
     for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
     {
         for (int ix = 0; ix < checkXsize(imap); ix++)
@@ -460,7 +462,7 @@ int main(void)
     current_map_no = 0;
 
     selectmap(current_map_no);
-    printmap(current_map_no);
+    //printmap(current_map_no);
 
     while(1)
     {
@@ -486,6 +488,11 @@ int main(void)
 
         decide_move(command, imap);
         printmap(current_map_no);
+        printf("history: ");
+        for (int i = 0; i <= 4; ++i) {
+            printf("%c", history[i]);
+        }
+        printf("\n");
         // TESTING
         // i++;
     }
