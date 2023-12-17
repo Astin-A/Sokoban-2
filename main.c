@@ -421,6 +421,9 @@ int main(void)
     int imap = 0;
 
     load_map();
+    
+    if (check_error == 1)
+        return 0;
 
     current_map_no = 0;
 
