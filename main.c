@@ -413,8 +413,14 @@ void printmap(int imap) //* Prints the map currently being played
     printf("\n\n");
 }
 
+char cmd_history[5] = {'\0'}; //Stack variable that records the movement commands in reverse and stores 5
+_Bool box_history[5];
+
 void selectmap(int imap) // Select the map to play
 {
+    for (int i = 0; i <= 4; ++i)
+        cmd_history[i] = box_history[i] = '\0';
+
     for (int iy = 0; iy < checkYsize(imap, checkXsize(imap)); iy++)
     {
         for (int ix = 0; ix < checkXsize(imap); ix++)
@@ -439,8 +445,6 @@ void newgame(int imap) // Restart from the first map
 }
 
 int history_idx = 0; //* Variable that reads the history array backwards
-char cmd_history[5] = {'\0'}; //Stack variable that records the movement commands in reverse and stores 5
-_Bool box_history[5];
 
 void record_history(char move) //* Function to record player movements
 {
@@ -459,15 +463,12 @@ void undo()
 {
      is_undoing = true;
 
-     printf("mvbox: %d\n", box_history[4]);
-
      decide_move(cmd_history[4], current_map_no);
 
 
 
      if (box_history[4])
      {
-         printf("mvbox: %c\n", cmd_history[4]);
          switch (cmd_history[4])
          {
              case 'h':// left
@@ -641,7 +642,6 @@ int main(void)
         for (int  i = 0;  i <= 4; ++ i) {
             printf("%d", box_history[i]);
         }
-        printf("\nPOSITION: (%d,%d)", current_player_pos[0], current_player_pos[1]);
     }
 
     end:
