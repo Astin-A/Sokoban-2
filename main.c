@@ -410,7 +410,7 @@ void selectmap(int imap) // Select the map to play
     get_player_pos(current_map_no);
 }
 
-void newgame(void) // Restart from the first map
+void newgame(int imap) // Restart from the first map
 {
     int imap=0;
 
@@ -497,20 +497,29 @@ int main(void)
         switch(command)
         {
             case 'n':
-                newgame();
+                newgame(0);
+                move_count=0;
                 break;
+
+            case 'r':
+                newgame(current_map_no);
+                break;
+
             case 'u':
                 is_undoing = true;
                 decide_move(history[4], current_map_no);
                 is_undoing = false;
                 break;
+
             case 'o':
                 goto end;
                 break;
+
             case 't':
                 command = getch();
                 ranking(move_count,command);
                 break;
+                
             case 'h':
             case 'j':
             case 'k':
